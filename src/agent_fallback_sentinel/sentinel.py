@@ -132,9 +132,7 @@ class AgentSentinel:
         logger.info("switching to fallback provider")
 
         try:
-            raw = self._run_with_retries(
-                fallback_fn, "fallback", self.fallback_max_retries, errors
-            )
+            raw = self._run_with_retries(fallback_fn, "fallback", self.fallback_max_retries, errors)
             result = self._validate(raw, schema)
             self._emit("success", {"provider": "fallback"})
             return result
@@ -146,4 +144,3 @@ class AgentSentinel:
                 f"All provider routes failed after {len(errors)} attempt(s).",
                 errors=errors,
             ) from fe
-            
