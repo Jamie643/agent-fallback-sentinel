@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from typing import List, Optional
-
 
 class SentinelError(Exception):
     """Base class for all sentinel errors."""
 
 
-class SentinelCircuitBreaker(SentinelError):
+class SentinelCircuitBreaker(SentinelError):  # noqa: N818
     """
     Raised when every provider route has been exhausted.
 
@@ -18,6 +16,6 @@ class SentinelCircuitBreaker(SentinelError):
         errors:  All underlying exceptions captured during the run, in order.
     """
 
-    def __init__(self, message: str, errors: Optional[List[Exception]] = None) -> None:
+    def __init__(self, message: str, errors: list[Exception] | None = None) -> None:
         super().__init__(message)
-        self.errors: List[Exception] = errors or []
+        self.errors: list[Exception] = errors or []
