@@ -1,12 +1,10 @@
-# Agent-Fallback-Sentinel
 # agent-fallback-sentinel
 
-> Lightweight, production-grade middleware for resilient LLM calls — retries, automated fallback routing, circuit-breaking, and rigid schema validation.
-
 [![CI](https://github.com/Jamie643/agent-fallback-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/Jamie643/agent-fallback-sentinel/actions/workflows/ci.yml)
-[![PyPI version](https://img.shields.io/badge/pypi-soon-blue.svg)](#)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+> Lightweight, production-grade middleware for resilient LLM calls — retries, automated fallback routing, circuit-breaking, and rigid schema validation.
 
 ---
 
