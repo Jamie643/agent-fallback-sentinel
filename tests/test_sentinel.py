@@ -19,7 +19,7 @@ class OutputSchema(BaseModel):
 @pytest.fixture
 def no_sleep_sentinel():
     """Sentinel with max_retries=2 and no actual sleeping."""
-        return AgentSentinel(
+    return AgentSentinel(
         max_retries=2, cooldown=0.0, fallback_max_retries=1, sleep_fn=lambda _: None
     )
 
