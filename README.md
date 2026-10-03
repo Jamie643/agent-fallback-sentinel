@@ -30,10 +30,6 @@ Zero dependencies beyond `pydantic`.
 
 ```bash
 pip install agent-fallback-sentinel
-```
-
-_(Coming to PyPI. For now: `pip install git+https://github.com/Jamie643/agent-fallback-sentinel.git`)_
-
 ---
 
 ## Quickstart
