@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Callable, List, Optional, Type
+from typing import Any, Callable
 
 from pydantic import BaseModel, ValidationError
 
@@ -39,7 +39,7 @@ class AgentSentinel:
         cooldown: float = 1.0,
         fallback_max_retries: int = 1,
         sleep_fn: Callable[[float], None] = time.sleep,
-        on_event: Optional[Callable[[str, dict], None]] = None,
+        on_event: Callable[[str, dict], None] | None = None,
     ) -> None:
         if max_retries < 0 or fallback_max_retries < 0:
             raise ValueError("retry counts must be >= 0")
@@ -68,7 +68,7 @@ class AgentSentinel:
         fn: Callable[[], Any],
         label: str,
         max_retries: int,
-        errors: List[Exception],
+        errors: list[Exception],
     ) -> Any:
         """Attempt a callable up to ``max_retries + 1`` times. Raises on final failure."""
         last_exc: Exception = RuntimeError(f"{label} produced no attempts")
@@ -92,7 +92,7 @@ class AgentSentinel:
 
         raise last_exc
 
-    def _validate(self, result: Any, schema: Optional[Type[BaseModel]]) -> Any:
+    def _validate(self, result: Any, schema: type[BaseModel] | None) -> Any:
         if schema is None:
             return result
         return schema.model_validate(result).model_dump()
@@ -105,14 +105,14 @@ class AgentSentinel:
         self,
         primary_fn: Callable[[], Any],
         fallback_fn: Callable[[], Any],
-        schema: Optional[Type[BaseModel]] = None,
+        schema: type[BaseModel] | None = None,
     ) -> Any:
         """
         Run ``primary_fn`` with retries. On exhaustion (or schema failure),
         run ``fallback_fn`` with retries. If both fail, raise
         :class:`SentinelCircuitBreaker`.
         """
-        errors: List[Exception] = []
+        errors: list[Exception] = []
 
         # --- Phase 1: primary ---
         try:
