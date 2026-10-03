@@ -14,7 +14,7 @@ from typing import Any, Callable
 
 from pydantic import BaseModel, ValidationError
 
-from .exceptions import SentinelCircuitBreaker
+from agent_fallback_sentinel.exceptions import SentinelCircuitBreaker
 
 logger = logging.getLogger("agent_sentinel")
 
@@ -39,7 +39,7 @@ class AgentSentinel:
         cooldown: float = 1.0,
         fallback_max_retries: int = 1,
         sleep_fn: Callable[[float], None] = time.sleep,
-        on_event: Callable[[str, dict], None] | None = None,
+        on_event: Callable[[str, dict[str, Any]], None] | None = None,
     ) -> None:
         if max_retries < 0 or fallback_max_retries < 0:
             raise ValueError("retry counts must be >= 0")
@@ -56,7 +56,7 @@ class AgentSentinel:
     # Internal helpers
     # ------------------------------------------------------------------ #
 
-    def _emit(self, event: str, payload: dict) -> None:
+    def _emit(self, event: str, payload: dict[str, Any]) -> None:
         if self._on_event is not None:
             try:
                 self._on_event(event, payload)
@@ -146,3 +146,4 @@ class AgentSentinel:
                 f"All provider routes failed after {len(errors)} attempt(s).",
                 errors=errors,
             ) from fe
+            
