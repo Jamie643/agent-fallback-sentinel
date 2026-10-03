@@ -1,0 +1,3 @@
+ruff check .
+mypy src
+pytest
