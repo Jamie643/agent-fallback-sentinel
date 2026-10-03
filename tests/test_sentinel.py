@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import pytest
-from agent_fallback_sentinel import AgentSentinel, SentinelCircuitBreaker
 from pydantic import BaseModel
+
+from agent_fallback_sentinel import AgentSentinel, SentinelCircuitBreaker
 
 
 # --------------------------------------------------------------------------- #
