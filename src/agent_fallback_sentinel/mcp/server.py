@@ -23,8 +23,10 @@ logging.basicConfig(level=logging.INFO, stream=sys.stderr)
 logger = logging.getLogger("agent_fallback_sentinel.mcp")
 
 
-def build_server() -> FastMCP:
+def build_server() -> "FastMCP":
     """Construct the MCP server with all tools registered."""
+    from mcp.server.fastmcp import FastMCP  # noqa: PLC0415
+
     mcp = FastMCP(
         "agent-fallback-sentinel",
         instructions=(
@@ -38,7 +40,6 @@ def build_server() -> FastMCP:
     )
     register_tools(mcp)
     return mcp
-
 
 def main() -> None:
     """Run the MCP server over stdio."""
