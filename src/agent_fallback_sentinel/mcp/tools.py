@@ -23,6 +23,7 @@ from agent_fallback_sentinel.mcp.state import SESSION, ProviderConfig
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
 
+
 # --------------------------------------------------------------------------- #
 # Internal helpers
 # --------------------------------------------------------------------------- #
@@ -48,7 +49,7 @@ def _make_callable(provider_name: str, model: str, prompt: str) -> Any:
 # Tool registration
 # --------------------------------------------------------------------------- #
 
-def register_tools(mcp: FastMCP) -> None:
+def register_tools(mcp: "FastMCP") -> None:
     """Register all MCP tools on the given FastMCP instance."""
 
     @mcp.tool()  # type: ignore[untyped-decorator]
