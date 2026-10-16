@@ -12,20 +12,16 @@ from __future__ import annotations
 
 import logging
 import sys
-from typing import TYPE_CHECKING
 
 from agent_fallback_sentinel.mcp.tools import register_tools
 
-if TYPE_CHECKING:
-    from mcp.server.fastmcp import FastMCP
-    
 logging.basicConfig(level=logging.INFO, stream=sys.stderr)
 logger = logging.getLogger("agent_fallback_sentinel.mcp")
 
 
-def build_server() -> "FastMCP":
+def build_server() -> "object":
     """Construct the MCP server with all tools registered."""
-    from mcp.server.fastmcp import FastMCP  # noqa: PLC0415
+    from mcp.server.fastmcp import FastMCP  # imported lazily — optional dep
 
     mcp = FastMCP(
         "agent-fallback-sentinel",
@@ -41,11 +37,12 @@ def build_server() -> "FastMCP":
     register_tools(mcp)
     return mcp
 
+
 def main() -> None:
     """Run the MCP server over stdio."""
     logger.info("Starting agent-fallback-sentinel MCP server")
     server = build_server()
-    server.run()
+    server.run()  # type: ignore[attr-defined]
 
 
 if __name__ == "__main__":
