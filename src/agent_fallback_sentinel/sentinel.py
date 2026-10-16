@@ -1,11 +1,3 @@
-"""
-Core AgentSentinel implementation.
-
-Executes a primary provider callable, retries transient failures,
-fails over to a secondary callable, and enforces a Pydantic schema on
-whichever provider ultimately succeeds.
-"""
-
 from __future__ import annotations
 
 import logging
@@ -14,6 +6,7 @@ from typing import Any, Callable
 
 from pydantic import BaseModel, ValidationError
 
+from agent_fallback_sentinel.exceptions import SentinelCircuitBreaker
 from agent_fallback_sentinel.exceptions import SentinelCircuitBreaker
 
 logger = logging.getLogger("agent_sentinel")
