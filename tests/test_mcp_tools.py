@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import json
 from typing import Any
 
 import pytest
-
 from agent_fallback_sentinel.mcp import providers as provider_module
 from agent_fallback_sentinel.mcp.state import SESSION
 from agent_fallback_sentinel.mcp.tools import _make_dynamic_model
