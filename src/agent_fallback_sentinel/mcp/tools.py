@@ -12,14 +12,14 @@ Four tools:
 from __future__ import annotations
 
 import json
-from typing import Any
+from typing import Any, cast
 
 from mcp.server.fastmcp import FastMCP
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, create_model
 
 from agent_fallback_sentinel import AgentSentinel, SentinelCircuitBreaker
-from agent_fallback_sentinel.mcp.providers import ProviderConfig, ProviderError, get_provider
-from agent_fallback_sentinel.mcp.state import SESSION
+from agent_fallback_sentinel.mcp.providers import ProviderError, get_provider
+from agent_fallback_sentinel.mcp.state import SESSION, ProviderConfig
 
 
 # --------------------------------------------------------------------------- #
@@ -35,7 +35,7 @@ def _make_callable(provider_name: str, model: str, prompt: str) -> Any:
         try:
             result = provider_fn(prompt, model=model)
             SESSION.stats.record_success(provider_name)
-            return str(result)
+            return cast(str, result)
         except ProviderError:
             SESSION.stats.record_failure(provider_name)
             raise
@@ -50,7 +50,7 @@ def _make_callable(provider_name: str, model: str, prompt: str) -> Any:
 def register_tools(mcp: FastMCP) -> None:
     """Register all MCP tools on the given FastMCP instance."""
 
-    @mcp.tool()
+    @mcp.tool()  # type: ignore[untyped-decorator]
     def configure_providers(
         providers: list[dict[str, str]],
     ) -> dict[str, Any]:
@@ -105,7 +105,7 @@ def register_tools(mcp: FastMCP) -> None:
             "providers": [{"name": c.name, "model": c.model} for c in configs],
         }
 
-    @mcp.tool()
+    @mcp.tool()  # type: ignore[untyped-decorator]
     def resilient_llm_call(
         prompt: str,
         schema_json: str = "",
@@ -138,11 +138,6 @@ def register_tools(mcp: FastMCP) -> None:
 
         SESSION.stats.total_calls += 1
 
-        # Build a list of (provider_config, callable) for the sentinel.
-        # We use AgentSentinel's execute_with_fallback with a dynamic schema.
-        if len(providers) < 1:
-            return {"status": "error", "message": "empty provider list"}
-
         schema_model: type[BaseModel] | None = None
         if schema_json:
             try:
@@ -173,7 +168,6 @@ def register_tools(mcp: FastMCP) -> None:
                 )
                 return {
                     "status": "ok",
-                    "provider": _last_used_provider(),
                     "structured": result,
                     "stats": SESSION.stats.to_dict(),
                 }
@@ -181,7 +175,6 @@ def register_tools(mcp: FastMCP) -> None:
             text = sentinel.execute_with_fallback(primary_call, fallback_call)
             return {
                 "status": "ok",
-                "provider": _last_used_provider(),
                 "text": text,
                 "stats": SESSION.stats.to_dict(),
             }
@@ -193,7 +186,7 @@ def register_tools(mcp: FastMCP) -> None:
                 "stats": SESSION.stats.to_dict(),
             }
 
-    @mcp.tool()
+    @mcp.tool()  # type: ignore[untyped-decorator]
     def get_fallback_stats() -> dict[str, Any]:
         """
         Return accumulated statistics for the current MCP server session.
@@ -203,7 +196,7 @@ def register_tools(mcp: FastMCP) -> None:
         """
         return SESSION.stats.to_dict()
 
-    @mcp.tool()
+    @mcp.tool()  # type: ignore[untyped-decorator]
     def validate_schema(
         payload_json: str,
         schema_json: str,
@@ -241,14 +234,7 @@ def register_tools(mcp: FastMCP) -> None:
 # Helpers
 # --------------------------------------------------------------------------- #
 
-_LAST_PROVIDER: dict[str, str] = {"name": ""}
-
-
-def _last_used_provider() -> str:
-    return _LAST_PROVIDER.get("name", "unknown")
-
-
-def _make_fallback_chain(fallbacks: list[Any], prompt: str) -> Any:
+def _make_fallback_chain(fallbacks: list[ProviderConfig], prompt: str) -> Any:
     """
     Build a single callable that tries fallbacks in order.
 
@@ -260,9 +246,7 @@ def _make_fallback_chain(fallbacks: list[Any], prompt: str) -> Any:
         for cfg in fallbacks:
             call = _make_callable(cfg.name, cfg.model, prompt)
             try:
-                result = call()
-                _LAST_PROVIDER["name"] = cfg.name
-                return result
+                return cast(str, call())
             except Exception as exc:  # noqa: BLE001
                 last_error = exc
                 continue
@@ -278,8 +262,6 @@ def _make_dynamic_model(schema_dict: dict[str, Any]) -> type[BaseModel]:
     Supports `type: object` with `properties` mapping field names to
     `{type: string|integer|number|boolean}`.
     """
-    from pydantic import create_model
-
     if schema_dict.get("type") != "object":
         raise ValueError("only 'object' schemas are supported")
 
@@ -310,4 +292,4 @@ def _make_dynamic_model(schema_dict: dict[str, Any]) -> type[BaseModel]:
         else:
             fields[field_name] = (type_map[type_name] | None, None)
 
-    return create_model("DynamicModel", **fields)
+    return cast(type[BaseModel], create_model("DynamicModel", **fields))
