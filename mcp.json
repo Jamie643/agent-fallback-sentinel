@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "agent-fallback-sentinel": {
+      "command": "uvx",
+      "args": ["--from", "agent-fallback-sentinel[mcp,providers]", "agent-fallback-sentinel-mcp"],
+      "env": {
+        "OPENAI_API_KEY": "sk-...",
+        "ANTHROPIC_API_KEY": "sk-ant-...",
+        "AWS_ACCESS_KEY_ID": "...",
+        "AWS_SECRET_ACCESS_KEY": "...",
+        "AWS_DEFAULT_REGION": "us-east-1"
+      }
+    }
+  }
+}
