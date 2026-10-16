@@ -12,11 +12,13 @@ from __future__ import annotations
 
 import logging
 import sys
-
-from mcp.server.fastmcp import FastMCP
+from typing import TYPE_CHECKING
 
 from agent_fallback_sentinel.mcp.tools import register_tools
 
+if TYPE_CHECKING:
+    from mcp.server.fastmcp import FastMCP
+    
 logging.basicConfig(level=logging.INFO, stream=sys.stderr)
 logger = logging.getLogger("agent_fallback_sentinel.mcp")
 
