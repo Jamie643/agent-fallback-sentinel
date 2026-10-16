@@ -12,7 +12,7 @@ import json
 import os
 import urllib.error
 import urllib.request
-from typing import Any
+from typing import Any, cast
 
 
 class ProviderError(Exception):
@@ -41,7 +41,9 @@ def call_openai(prompt: str, model: str = "gpt-4o-mini", **_: Any) -> str:
         content = response.choices[0].message.content
         if content is None:
             raise ProviderError("OpenAI returned empty content")
-        return content
+        return cast(str, content)
+    except ProviderError:
+        raise
     except Exception as exc:  # noqa: BLE001
         raise ProviderError(f"OpenAI failed: {exc}") from exc
 
@@ -66,12 +68,13 @@ def call_anthropic(prompt: str, model: str = "claude-3-5-haiku-latest", **_: Any
             max_tokens=2048,
             messages=[{"role": "user", "content": prompt}],
         )
-        # Concatenate text blocks.
         parts = [block.text for block in response.content if hasattr(block, "text")]
-        text = "".join(parts)
+        text = "".join(cast(list[str], parts))
         if not text:
             raise ProviderError("Anthropic returned empty content")
         return text
+    except ProviderError:
+        raise
     except Exception as exc:  # noqa: BLE001
         raise ProviderError(f"Anthropic failed: {exc}") from exc
 
@@ -99,7 +102,7 @@ def call_bedrock(
             messages=[{"role": "user", "content": [{"text": prompt}]}],
         )
         text = response["output"]["message"]["content"][0]["text"]
-        return str(text)
+        return cast(str, text)
     except (ClientError, BotoCoreError) as exc:
         raise ProviderError(f"Bedrock failed: {exc}") from exc
     except (KeyError, IndexError, TypeError) as exc:
@@ -134,7 +137,7 @@ def call_ollama(
         text = body.get("response", "")
         if not text:
             raise ProviderError("Ollama returned empty response")
-        return str(text)
+        return cast(str, text)
     except urllib.error.URLError as exc:
         raise ProviderError(f"Ollama unreachable at {base_url}: {exc}") from exc
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
