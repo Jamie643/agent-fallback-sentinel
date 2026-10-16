@@ -12,15 +12,16 @@ Four tools:
 from __future__ import annotations
 
 import json
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
-from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, ValidationError, create_model
 
 from agent_fallback_sentinel import AgentSentinel, SentinelCircuitBreaker
 from agent_fallback_sentinel.mcp.providers import ProviderError, get_provider
 from agent_fallback_sentinel.mcp.state import SESSION, ProviderConfig
 
+if TYPE_CHECKING:
+    from mcp.server.fastmcp import FastMCP
 
 # --------------------------------------------------------------------------- #
 # Internal helpers
