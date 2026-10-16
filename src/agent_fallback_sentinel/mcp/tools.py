@@ -273,13 +273,13 @@ def _make_fallback_chain(fallbacks: list[Any], prompt: str) -> Any:
 
 def _make_dynamic_model(schema_dict: dict[str, Any]) -> type[BaseModel]:
     """
-    Build a Pydantic model from a JSON-schema-like dict.
+    Build a Pydantic model from a JSON-schema-like dict using create_model.
 
-    Supports a minimal subset: `type: object` with `properties` mapping
-    field names to `{type: string|integer|number|boolean}`.
-
-    Raises ValueError if the schema isn't supported.
+    Supports `type: object` with `properties` mapping field names to
+    `{type: string|integer|number|boolean}`.
     """
+    from pydantic import create_model
+
     if schema_dict.get("type") != "object":
         raise ValueError("only 'object' schemas are supported")
 
@@ -289,7 +289,7 @@ def _make_dynamic_model(schema_dict: dict[str, Any]) -> type[BaseModel]:
 
     required = set(schema_dict.get("required", []))
 
-    type_map = {
+    type_map: dict[str, type] = {
         "string": str,
         "integer": int,
         "number": float,
@@ -300,16 +300,14 @@ def _make_dynamic_model(schema_dict: dict[str, Any]) -> type[BaseModel]:
     for field_name, spec in properties.items():
         if not isinstance(spec, dict):
             raise ValueError(f"property '{field_name}' must be an object")
-        field_type_name = spec.get("type")
-        if field_type_name not in type_map:
+        type_name = spec.get("type")
+        if type_name not in type_map:
             raise ValueError(
-                f"property '{field_name}' has unsupported type '{field_type_name}'"
+                f"property '{field_name}' has unsupported type '{type_name}'"
             )
-        field_type = type_map[field_type_name]
-        default = ... if field_name in required else None
-        fields[field_name] = (field_type | None, default) if field_name not in required else (field_type, ...)
+        if field_name in required:
+            fields[field_name] = (type_map[type_name], ...)
+        else:
+            fields[field_name] = (type_map[type_name] | None, None)
 
-    # Create the model dynamically.
-    return type("DynamicModel", (BaseModel,), {"__annotations__": {}, **{
-        f: default for f, default in fields.items()
-    }})
+    return create_model("DynamicModel", **fields)
