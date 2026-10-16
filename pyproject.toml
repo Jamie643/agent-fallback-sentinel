@@ -5,18 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "agent-fallback-sentinel"
 version = "0.2.0"
-description = "Lightweight production middleware for resilient LLM calls: retries, fallback routing, circuit-breaking, and rigid schema validation."
+description = "MCP server and library for resilient LLM calls: retries, provider failover, circuit-breaking, and rigid schema validation."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "Jamie643" }]
-keywords = ["llm", "resilience", "circuit-breaker", "fallback", "pydantic", "agents"]
+keywords = ["mcp", "llm", "resilience", "circuit-breaker", "fallback", "pydantic", "agents"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -44,28 +43,6 @@ dev = [
 [project.scripts]
 agent-fallback-sentinel-mcp = "agent_fallback_sentinel.mcp.server:main"
 
-[tool.mypy.overrides]
-# Allow missing imports for optional providers (they're optional deps).
-[[tool.mypy.overrides]]
-module = "openai.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "anthropic.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "mcp.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "boto3.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "botocore.*"
-ignore_missing_imports = true
-
 [project.urls]
 Homepage = "https://github.com/Jamie643/agent-fallback-sentinel"
 Issues = "https://github.com/Jamie643/agent-fallback-sentinel/issues"
@@ -79,14 +56,20 @@ addopts = "-v --cov=agent_fallback_sentinel --cov-report=term-missing"
 
 [tool.ruff]
 line-length = 100
-target-version = "py39"
+target-version = "py310"
+exclude = [
+    "scripts",
+    ".venv",
+    "build",
+    "dist",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
-ignore = ["N818", "I001"]
+ignore = ["N818", "I001", "E501", "N803", "N806"]
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 strict = true
 warn_unused_ignores = true
 explicit_package_bases = true
@@ -96,3 +79,23 @@ namespace_packages = true
 [[tool.mypy.overrides]]
 module = "tests.*"
 ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "openai.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "anthropic.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "boto3.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "botocore.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "mcp.*"
+ignore_missing_imports = true
